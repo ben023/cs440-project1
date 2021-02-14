@@ -71,7 +71,7 @@ int getN(int value){
 	}
 }
 bool CapOk(int recordsCt, int blockCt){
-	if( (float) recordsCt / (float) (blockCt) * 5.0 > 0.8){
+	if( (float) recordsCt / ((float) (blockCt) * 5.0) > 0.8){
 		return false;
 	}
 	else{
@@ -274,7 +274,6 @@ void addOverflow(int index){
 	ofile.close();
 }
 void removeOverflow(int index){
-	cout << "debugging3" << endl;
 	ifstream ifile;
 	ofstream ofile;
 
@@ -303,13 +302,16 @@ void removeOverflow(int index){
 		else{
 			remade_str += std::to_string(overflow) + '\n';
 		}
-		remade_str += std::to_string(overflow) + '\n';
+		// remade_str += std::to_string(overflow) + '\n';
 		for(int j = 0;j < overflow-1;j++){
 			int overflow_offset = readNumber(ifile);
 			remade_str += std::to_string(overflow_offset) + '\n';
 		}
+		if(i==index-1){
 		//skip last block
 		int overflow_offset = readNumber(ifile);
+		}
+		
 	}
 
 
@@ -366,7 +368,7 @@ int countRecords(string block) {
   int counter = 0;
 
   for (int i = 0; i < block.size(); i++)
-    if (block[i] == '#') counter++;
+    if (block[i] == '$') counter++;
 
   return counter;
 }
@@ -391,48 +393,415 @@ int getNextIndex(vector<string> vect){
 }
 
 int main(int argc, char *argv[]){
-	addBlock(2, 0);
+	string arg1 = argv[1];
+	// string arg2 = argv[2];
+	if (arg1 == "C"){
+		addBlock(2, 0);
 
-	//base index
-	vector<string> index;
-	index.push_back("0");
-	index.push_back("1");
+		//base index
+		vector<string> index;
+		index.push_back("0");
+		index.push_back("1");
 
-	//grab the entire strcuture of the current hash table
-	vector<vector<int>> bucketArray;
-	createBucketArray(bucketArray);
-	// printBucketArray(bucketArray);
+		//grab the entire strcuture of the current hash table
+		vector<vector<int>> bucketArray;
+		createBucketArray(bucketArray);
+		// printBucketArray(bucketArray);
 
-	//grab how many buckets we currently have in bucketArray to build
-	// N sized index with binary keys eg. '00,01,10,11'
-	// int N = getN(1);
-	buildIndex(index);
-    // addBlock();
+		//grab how many buckets we currently have in bucketArray to build
+		// N sized index with binary keys eg. '00,01,10,11'
+		// int N = getN(1);
+		buildIndex(index);
+		// addBlock();
 
-    ifstream employee_csv("Employees.csv");
-	string line;
-	// while (getline(employee_csv, line)){ //uncomment later after done testing with just one line
-  // and add } at end
-		for (int k=0; k<5; k++){
-			getline(employee_csv,line); // remove when uncommenting the while loop
-		stringstream sst(line);
-		fstream s("test.txt");
+		// ifstream employee_csv("Employee.csv");
+		ifstream fp;
+		fp.open("Employee.csv");
+		string full_record;
+		string line;
+		// while (getline(employee_csv, line)){ //uncomment later after done testing with just one line
+	// and add } at end
+			for (int k=0; k<1; k++){
+				getline(fp,full_record); // remove when uncommenting the while loop
+			// stringstream sst(line);
+			// fstream s("test.txt");
+			
+			size_t st;
+			string hash_value;
+			string eid, name, bio, mid;
+			string field;
+
+			// string full_record;
+			// getline(employee_csv, full_record);
+			
+			std::string delimiter = ",";
+			cout << "full record: " << full_record << endl;
+			size_t pos = 0;
+			std::string token;
+			vector <string> record111;
+			while ((pos = full_record.find(delimiter)) != std::string::npos) {
+				token = full_record.substr(0, pos);
+				std::cout << token << std::endl;
+				full_record.erase(0, pos + delimiter.length());
+				record111.push_back(token);
+				// cout << "1" << endl;
+			}
+			record111.push_back(full_record);
+
+			// get record data from one row of csv
+			// getline(sst, eid, ',');
+			// getline(sst, name, ',');
+			// getline(sst, bio, ',');
+			// getline(sst, mid, ',');
+			eid = record111.at(0);
+			// cout << "eid: " << eid << endl;
+			name = record111.at(1);
+			bio = record111.at(2);
+			mid = record111.at(3);
+
+			// cout << "Testing all fields: " << eid << name << bio << mid << endl;
+			// mid.erase(s.find('\r');
+			
+			hash_value = getHash(stoi(eid, &st));
+			string last_n_bits;
+			int found_index;
+			int found_matching_id;
+			for(int i=0;i<index.size();i++){
+				// cout << index[i] << " ";
+				if (index.at(i) == levelKey(hash_value, index.at(i).length()) ){
+					last_n_bits = levelKey(hash_value, index.at(i).length());
+					// cout << "found matching key" << last_n_bits <<  endl;
+					// cout << "at index i = " << i << endl;
+					found_index = i;
+					// now find grab all relevant metadata from bucket vector at index i
+				
+				} 
+			}
+			// ;
 		
+		
+			// delimiter '#' for separating elements within a record, '$' for separating whole records within a block
+			// string new_record = "";
+			cout << "separately: " << eid << name << bio << mid << endl;
+			string new_record;
+			// string new_record2 = mid + "$";
+			// string new_record3 = mid + "$";
+
+			// new_record.append("heloooooooo");
+			// new_record+="name";
+			cout << "record(0)" << record111.at(0) << endl;
+			cout << "record(1)" << record111.at(1) << endl;
+			cout << "record(2)" << record111.at(2) << endl;
+			cout << "record(3)" << record111.at(3) << endl;
+
+			ostringstream oss;
+			oss << record111.at(0) + "#" + record111.at(1) + "#" + record111.at(2) + "#" + record111.at(3) + "$"<< endl;
+			string please = oss.str();
+			cout << "please: " << please << endl;
+			// cout << "new_record2: " << new_record2 << endl;
+			new_record = please;
+			int last_block_offset; 
+			// find offset for last block in bucket array at matching index (it will be the block we add 
+			// the new record into, assuming each block is filled before going to next block)
+			// for (int i=0; i<bucketArray.at(found_index).size(); i++){
+			//     // cout << "Bucket array offsets: " << bucketArray.at(found_index).at(i) << endl;
+
+			// }
+
+			last_block_offset = bucketArray.at(found_index).at((bucketArray.at(found_index).size()-1));
+			// cout << "Last block offset: " << last_block_offset << endl;
+			// read in block and check if the block is full or not (5 records)
+			string old_block = readBlock(last_block_offset);
+			
+			// cout << "block: " << old_block << endl;
+			int counter = countRecords(old_block);
+			// cout << "count of records in block: " << counter << endl;
+			
+
+			//testing add bucket:
+			// addbucket();
+			// createBucketArray();
+
+			fp.close();
+
+			fstream s("test.txt");
+			if (counter < 5){
+				// cout << "Add record here, room available" << endl;
+				// cout << "Old block: " << old_block << endl;
+
+				// code to strip white spaces from end used from:
+				// https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+				size_t endpos = old_block.find_last_not_of(" \t");
+				size_t startpos = old_block.find_first_not_of(" \t");
+				if( std::string::npos != endpos )
+				{
+					old_block = old_block.substr( 0, endpos+1 );
+					old_block = old_block.substr( startpos );
+				}
+				else {
+					old_block.erase(std::remove(std::begin(old_block), std::end(old_block), ' '), std::end(old_block));
+				}
+
+				// std::string::iterator end_pos = std::remove(old_block.begin(), old_block.end(), ' ');
+				// old_block.erase(end_pos, old_block.end());		
+				// cout << "Old block: " << old_block << endl;
+				// append new record to block, old data now contains all data
+				old_block.append(new_record);
+				
+				old_block.resize(4096,' '); // make sure extra room is filled with spaces
+				cout << "old_block: " << old_block << endl;
+				// cout << "old_block updated: " << old_block << endl;
+
+
+				// add new record to block, old data now contains all data
+				char buffer[4097];
+				// snprintf(buffer, 4096, old_block.c_str()); // buffer now contains updated block
+				strcpy(buffer, old_block.c_str());
+				// cout << "Buffer: " << buffer << endl;
+				s.seekp(4096*last_block_offset, ios_base::beg);
+				s.write(buffer, 4096);
+				
+				incrementRecordCt();
+				//call increment record count function here to update bucket.txt
+
+			} 
+			else {
+				// no room in last block, must add new overflow block
+				addOverflow(found_index);
+				createBucketArray(bucketArray);
+
+				// update last block offset with new offset of new overflow block
+				last_block_offset = bucketArray.at(found_index).at((bucketArray.at(found_index).size()-1));
+				new_record.resize(4096, ' ');
+				char buffer[4097];
+				strcpy(buffer, new_record.c_str());
+				s.seekp(4096*last_block_offset, ios_base::beg);
+				s.write(buffer, 4096);
+
+				incrementRecordCt();
+				//call increment record count function here to update bucket.txt
+			}
+
+			if (!CapOk(getN(0), getN(2))){
+				// cap exceeded, must split and redistribute
+				cout << "Cap reached: " << getN(0) << "," << getN(2) << endl;
+
+
+				int splitting_index = getNextIndex(index);
+				cout << "Debug6" << endl;
+				addBucket();
+				cout << "Debug7" << endl;
+
+				createBucketArray(bucketArray);
+				cout << "Debug8" << endl;
+
+				buildIndex(index);
+				cout << "Debug9" << endl;
+
+				
+				int added_index_from_split = index.size()-1;
+				int offset = bucketArray.at(added_index_from_split).at(0);
+				// cout << "Offset: "<< offset << endl;
+				// // addBlock(1, offset);
+
+				string new_block = "";
+				new_block.resize(4096, ' ');
+				char buffer[4097];
+				strcpy(buffer, new_block.c_str());
+				s.seekp(4096*offset, ios_base::beg);
+				s.write(buffer, 4096);
+
+
+				vector <string> save_all_blocks;
+
+				for (int i=0; i<bucketArray.at(splitting_index).size(); i++){
+					string blocks = readBlock(bucketArray.at(splitting_index).at(i));
+					save_all_blocks.push_back(blocks);
+				}
+
+
+
+				// calculate new key for split bucket
+				string key_after_split = index.at(splitting_index);
+				int key_after_split_size = index.at(splitting_index).length();
+				// use to access bucket array and find offset for start of first block within new bucket
+				
+
+				vector <string> keep_records;
+				vector <string> move_records;
+
+				for (int i=0; i<save_all_blocks.size(); i++){
+					stringstream ss1(save_all_blocks.at(i));
+					string s;
+					
+					while (getline(ss1, s, '$')){
+						string eid_temp;
+						cout << "S: " << s << endl;
+						if (getline(ss1,eid_temp,'#')){
+							stringstream convert_eid(eid_temp); // use stringstream to convert stringtype eid_temp from record to int type
+							int final_eid = 0;
+							convert_eid >> final_eid;
+							string hash_temp = getHash(final_eid);
+							if (levelKey(hash_temp,key_after_split_size) == key_after_split){
+								s.append("$");
+								// cout << "pushing to keep records: " << s << endl;
+								keep_records.push_back(s);
+							} else {
+								s.append("$");
+								// cout << "pushing to move records: " << s << endl;
+
+								move_records.push_back(s);
+							}
+						}
+					}
+
+				}
+				cout << "KEEP RECORDS: " << endl;
+				for (int i =0; i<keep_records.size(); i++){
+					cout << keep_records.at(i) << endl;
+				}
+				cout << "MOVE RECORDS: " << endl;
+
+				for (int i =0; i<move_records.size(); i++){
+					cout << move_records.at(i) << endl;
+
+				}
+
+
+				// gathered all records and organized into move and keep, now rewrite blocks accordingly
+				// first go through all block offsets for original bucket
+				float number_keep_records = keep_records.size();
+				float number_move_records = move_records.size();
+				int count_down1 = number_keep_records;
+				int count_down2 = number_move_records;
+
+				vector<string> all_keep_blocks;
+				vector<string> all_move_blocks;
+				cout << "Num keep records: " << number_keep_records << "number move records: " << number_move_records << endl;
+
+				int num_keep_blocks = ceil(number_keep_records / 5);
+				int num_move_blocks = ceil(number_move_records / 5);
+
+				cout << "Num move blocks: " << number_move_records << endl;
+				// build up new keep block 
+				for (int i=0; i<num_keep_blocks; i++){
+					all_keep_blocks.push_back("");
+					for (int j=0; j<5; j++){
+						if (count_down1 == 0){
+							break;
+						} else {
+							all_keep_blocks.at(i) = all_keep_blocks.at(i) + keep_records.back();
+							keep_records.pop_back();
+							count_down1--;
+						}
+					}
+					cout << "Keep block: " << all_keep_blocks.at(i) << endl;
+				}
+				
+				// //debug forloop
+				// cout << "Num keep blocks: " << num_keep_blocks << "Num move blocks: " << num_move_blocks << endl;
+
+				// loop through all original blocks and start to overwrite
+				for (int i=0; i<bucketArray.at(splitting_index).size(); i++){
+					int offset = bucketArray.at(splitting_index).at(i);
+					if (i >= all_keep_blocks.size()){
+						// rest of blocks need to be removed now
+						cout << "debugging1" << endl;
+						cout << "splitting index: " << splitting_index << endl;
+						removeOverflow(splitting_index);
+						cout << "debugging3" << endl;
+
+					} else {
+						cout << "debugging2" << endl;
+
+						// blocks to be overwritten
+						string updated_block = "";
+						updated_block.append(all_keep_blocks.at(i));
+						updated_block.resize(4096, ' ');
+						char buffer[4097];
+						strcpy(buffer, updated_block.c_str());
+						s.seekp(4096*offset, ios_base::beg);
+						s.write(buffer, 4096);
+					}
+				}
+			
+				for (int i=0; i<num_move_blocks; i++){
+					all_move_blocks.push_back("");
+					for (int j=0; j<5; j++){
+						if (count_down2 == 0){
+							break;
+						} else {
+							all_move_blocks.at(i) = all_move_blocks.at(i) + move_records.back();
+							move_records.pop_back();
+							count_down2--;
+						}
+					}
+					// cout << "Keep block: " << all_move_blocks.at(i) << endl;
+				}
+
+				
+				// now loop through new indexed bucket and create blocks from the movers
+				for (int i=0; i<num_move_blocks; i++){
+					if (i==0){
+						// working on primary block, find offset from bucketarray
+						int offset = bucketArray.at(added_index_from_split).at(0);
+						string updated_block = "";
+						updated_block.append(all_move_blocks.at(i));
+						updated_block.resize(4096, ' ');
+						char buffer[4097];
+						strcpy(buffer, updated_block.c_str());
+						s.seekp(4096*offset, ios_base::beg);
+						s.write(buffer, 4096);
+					} else {
+						// need to add overflow block
+						addOverflow(added_index_from_split);
+						createBucketArray(bucketArray);
+						int offset_after_adding =  bucketArray.at(added_index_from_split).at((bucketArray.at(added_index_from_split).size()-1));
+						string updated_block = "";
+						updated_block.append(all_move_blocks.at(i));
+						updated_block.resize(4096, ' ');
+						char buffer[4097];
+						strcpy(buffer, updated_block.c_str());
+						s.seekp(4096*offset_after_adding, ios_base::beg);
+						s.write(buffer, 4096);
+					}
+					
+				}
+
+
+	//TRACK HOW MANY BLOCKS THERE WERE ORIGINALLY, THEN COMPARE TO NUMBER OF BLOCKS NOW, CALL REMOVEOVERFLOWBLOCK AS NEEDED
+
+				// cout << "number keep:" << number_keep_records << endl;
+				// cout << "number move: " << number_move_records << endl;
+				// for (int i=0; i<bucketArray.at(splitting_index).size(); i++){
+				// 	string updated_block = "";
+				// 	updated_block.append
+				// 	updated_block.resize(4096, ' ');
+				// 	char buffer[4097];
+				// 	strcpy(buffer, updated_block.c_str());
+				// 	s.seekp(4096*offset, ios_base::beg);
+				// 	s.write(buffer, 4096);
+
+				// }
+			
+			
+			
+			}
+
+			
+			}
+	} else if (arg1 == "L"){
+		string id = argv[2];
 		size_t st;
-		string hash_value;
-		string eid, name, bio, mid;
-		string field;
-		
-        // get record data from one row of csv
-		getline(sst, eid, ',');
-		getline(sst, name, ',');
-		getline(sst, bio, ',');
-		getline(sst, mid, ',');
-
-		// cout << "Testing all fields: " << eid << name << bio << mid << endl;
-		// mid.erase(s.find('\r');
-		
-		hash_value = getHash(stoi(eid, &st));
+		string hash_value = getHash(stoi(id,&st));
+		// cout << "h"
+		cout << "hash: " << hash_value << endl;
+		vector<string> index;
+		index.push_back("0");
+		index.push_back("1");
+		vector<vector<int>> bucketArray;
+		createBucketArray(bucketArray);
+		buildIndex(index);
 		string last_n_bits;
 		int found_index;
 		int found_matching_id;
@@ -442,296 +811,47 @@ int main(int argc, char *argv[]){
 				last_n_bits = levelKey(hash_value, index.at(i).length());
 				// cout << "found matching key" << last_n_bits <<  endl;
 				// cout << "at index i = " << i << endl;
-                found_index = i;
-                // now find grab all relevant metadata from bucket vector at index i
+				found_index = i;
+				// now find grab all relevant metadata from bucket vector at index i
 			
 			} 
 		}
-		;
-	
-	
-		// delimiter '#' for separating elements within a record, '$' for separating whole records within a block
-		// string new_record = "";
-		string new_record = eid + "#" + name + "#" + bio + "#" + mid + "$";
-
-		// cout << "new_record: " << new_record << endl;
-        int last_block_offset; 
-        // find offset for last block in bucket array at matching index (it will be the block we add 
-        // the new record into, assuming each block is filled before going to next block)
-        for (int i=0; i<bucketArray.at(found_index).size(); i++){
-            // cout << "Bucket array offsets: " << bucketArray.at(found_index).at(i) << endl;
-
-        }
-
-        last_block_offset = bucketArray.at(found_index).at((bucketArray.at(found_index).size()-1));
-		// cout << "Last block offset: " << last_block_offset << endl;
-        // read in block and check if the block is full or not (5 records)
-        string old_block = readBlock(last_block_offset);
-		
-        // cout << "block: " << old_block << endl;
-		int counter = countRecords(old_block);
-		// cout << "count of records in block: " << counter << endl;
-		
-
-		//testing add bucket:
-		// addbucket();
-		// createBucketArray();
 
 
-		if (counter < 5){
-			// cout << "Add record here, room available" << endl;
-			// cout << "Old block: " << old_block << endl;
+		vector <string> save_all_blocks;
 
-			// code to strip white spaces from end used from:
-			// https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
-			size_t endpos = old_block.find_last_not_of(" \t");
-			size_t startpos = old_block.find_first_not_of(" \t");
-			if( std::string::npos != endpos )
-			{
-				old_block = old_block.substr( 0, endpos+1 );
-				old_block = old_block.substr( startpos );
-			}
-			else {
-				old_block.erase(std::remove(std::begin(old_block), std::end(old_block), ' '), std::end(old_block));
-			}
-
-			// std::string::iterator end_pos = std::remove(old_block.begin(), old_block.end(), ' ');
-			// old_block.erase(end_pos, old_block.end());		
-			// cout << "Old block: " << old_block << endl;
-			// append new record to block, old data now contains all data
-			old_block.append(new_record);
-			old_block.resize(4096,' '); // make sure extra room is filled with spaces
-		
-			// cout << "old_block updated: " << old_block << endl;
-
-
-			// add new record to block, old data now contains all data
-			char buffer[4097];
-			// snprintf(buffer, 4096, old_block.c_str()); // buffer now contains updated block
-			strcpy(buffer, old_block.c_str());
-			// cout << "Buffer: " << buffer << endl;
-			s.seekp(4096*last_block_offset, ios_base::beg);
-			s.write(buffer, 4096);
-			
-			incrementRecordCt();
-			//call increment record count function here to update bucket.txt
-
-		} 
-		else {
-			// no room in last block, must add new overflow block
-			addOverflow(found_index);
-			createBucketArray(bucketArray);
-
-			// update last block offset with new offset of new overflow block
-			last_block_offset = bucketArray.at(found_index).at((bucketArray.at(found_index).size()-1));
-			new_record.resize(4096, ' ');
-			char buffer[4097];
-			strcpy(buffer, new_record.c_str());
-			s.seekp(4096*last_block_offset, ios_base::beg);
-			s.write(buffer, 4096);
-
-			incrementRecordCt();
-			//call increment record count function here to update bucket.txt
+		for (int i=0; i<bucketArray.at(found_index).size(); i++){
+			string blocks = readBlock(bucketArray.at(found_index).at(i));
+			save_all_blocks.push_back(blocks);
 		}
+		vector <string> searched_record;
 
-		if (!CapOk(getN(0), getN(2))){
-			// cap exceeded, must split and redistribute
+
+		for (int i=0; i<save_all_blocks.size(); i++){
+			stringstream ss1(save_all_blocks.at(i));
+			string s;
 			
-			int splitting_index = getNextIndex(index);
-			
-			addBucket();
-			createBucketArray(bucketArray);
-			buildIndex(index);
-			
-			int added_index_from_split = index.size()-1;
-			int offset = bucketArray.at(added_index_from_split).at(0);
-			// cout << "Offset: "<< offset << endl;
-			// // addBlock(1, offset);
-
-			string new_block = "";
-			new_block.resize(4096, ' ');
-			char buffer[4097];
-			strcpy(buffer, new_block.c_str());
-			s.seekp(4096*offset, ios_base::beg);
-			s.write(buffer, 4096);
-
-
-			vector <string> save_all_blocks;
-
-			for (int i=0; i<bucketArray.at(splitting_index).size(); i++){
-				string blocks = readBlock(bucketArray.at(splitting_index).at(i));
-				save_all_blocks.push_back(blocks);
-        	}
-
-
-
-			// calculate new key for split bucket
-			string key_after_split = index.at(splitting_index);
-			int key_after_split_size = index.at(splitting_index).length();
-			// use to access bucket array and find offset for start of first block within new bucket
-			
-
-			vector <string> keep_records;
-			vector <string> move_records;
-			for (int i=0; i<save_all_blocks.size(); i++){
-				stringstream ss1(save_all_blocks.at(i));
-				string s;
-				
-				while (getline(ss1, s, '$')){
-					string eid_temp;
-					cout << "S: " << s << endl;
-					if (getline(ss1,eid_temp,'#')){
-						stringstream convert_eid(eid_temp); // use stringstream to convert stringtype eid_temp from record to int type
-						int final_eid = 0;
-						convert_eid >> final_eid;
-						string hash_temp = getHash(final_eid);
-						if (levelKey(hash_temp,key_after_split_size) == key_after_split){
-							s.append("$");
-							// cout << "pushing to keep records: " << s << endl;
-							keep_records.push_back(s);
-						} else {
-							s.append("$");
-							// cout << "pushing to move records: " << s << endl;
-
-							move_records.push_back(s);
-						}
-					}
-				}
-
-			}
-			cout << "KEEP RECORDS: " << endl;
-			for (int i =0; i<keep_records.size(); i++){
-				cout << keep_records.at(i) << endl;
-			}
-			cout << "MOVE RECORDS: " << endl;
-
-			for (int i =0; i<move_records.size(); i++){
-				cout << move_records.at(i) << endl;
-
-			}
-
-
-			// gathered all records and organized into move and keep, now rewrite blocks accordingly
-			// first go through all block offsets for original bucket
-			int number_keep_records = keep_records.size();
-			int number_move_records = move_records.size();
-			int count_down1 = number_keep_records;
-			int count_down2 = number_move_records;
-
-			vector<string> all_keep_blocks;
-			vector<string> all_move_blocks;
-			cout << "Num keep records: " << number_keep_records << "number move records: " << number_move_records << endl;
-
-			int num_keep_blocks = number_keep_records / 5 + (number_keep_records % 5 != 0);
-			int num_move_blocks = number_move_records / 5 + (number_move_records % 5 != 0);
-
-			cout << "Num move blocks: " << number_move_records << endl;
-			// build up new keep block 
-			for (int i=0; i<num_keep_blocks; i++){
-				all_keep_blocks.push_back("");
-				for (int j=0; j<5; j++){
-					if (count_down1 == 0){
-						break;
-					} else {
-						all_keep_blocks.at(i) = all_keep_blocks.at(i) + keep_records.back();
-						keep_records.pop_back();
-						count_down1--;
-					}
-				}
-				cout << "Keep block: " << all_keep_blocks.at(i) << endl;
-			}
-			
-			// //debug forloop
-			// cout << "Num keep blocks: " << num_keep_blocks << "Num move blocks: " << num_move_blocks << endl;
-
-			// loop through all original blocks and start to overwrite
-			for (int i=0; i<bucketArray.at(splitting_index).size(); i++){
-				int offset = bucketArray.at(splitting_index).at(i);
-				if (i >= all_keep_blocks.size()){
-					// rest of blocks need to be removed now
-					cout << "debugging1" << endl;
-					removeOverflow(splitting_index);
-					cout << "debugging3" << endl;
-
-				} else {
-					cout << "debugging2" << endl;
-
-					// blocks to be overwritten
-					string updated_block = "";
-					updated_block.append(all_keep_blocks.at(i));
-					updated_block.resize(4096, ' ');
-					char buffer[4097];
-					strcpy(buffer, updated_block.c_str());
-					s.seekp(4096*offset, ios_base::beg);
-					s.write(buffer, 4096);
+			while (getline(ss1, s, '$')){
+				string eid_temp;
+				// cout << "S: " << s << endl;
+				if (getline(ss1,eid_temp,'#')){
+					cout << "ss1" << eid_temp << endl;
+					if (eid_temp.compare(id) == 0){
+						searched_record.push_back(s);
+					} 
 				}
 			}
-		
-			// for (int i=0; i<num_move_blocks; i++){
-			// 	all_move_blocks.push_back("");
-			// 	for (int j=0; j<5; j++){
-			// 		if (count_down2 == 0){
-			// 			break;
-			// 		} else {
-			// 			all_move_blocks.at(i) = all_move_blocks.at(i) + move_records.back();
-			// 			move_records.pop_back();
-			// 			count_down2--;
-			// 		}
-			// 	}
-			// 	// cout << "Keep block: " << all_move_blocks.at(i) << endl;
-			// }
 
-			
-			// // now loop through new indexed bucket and create blocks from the movers
-			// for (int i=0; i<num_move_blocks; i++){
-			// 	if (i==0){
-			// 		// working on primary block, find offset from bucketarray
-			// 		int offset = bucketArray.at(added_index_from_split).at(0);
-			// 		string updated_block = "";
-			// 		updated_block.append(all_move_blocks.at(i));
-			// 		updated_block.resize(4096, ' ');
-			// 		char buffer[4097];
-			// 		strcpy(buffer, updated_block.c_str());
-			// 		s.seekp(4096*offset, ios_base::beg);
-			// 		s.write(buffer, 4096);
-			// 	} else {
-			// 		// need to add overflow block
-			// 		addOverflow(added_index_from_split);
-			// 		createBucketArray(bucketArray);
-			// 		int offset_after_adding =  bucketArray.at(added_index_from_split).at((bucketArray.at(added_index_from_split).size()-1));
-			// 		string updated_block = "";
-			// 		updated_block.append(all_move_blocks.at(i));
-			// 		updated_block.resize(4096, ' ');
-			// 		char buffer[4097];
-			// 		strcpy(buffer, updated_block.c_str());
-			// 		s.seekp(4096*offset_after_adding, ios_base::beg);
-			// 		s.write(buffer, 4096);
-			// 	}
-				
-			// }
-
-
-//TRACK HOW MANY BLOCKS THERE WERE ORIGINALLY, THEN COMPARE TO NUMBER OF BLOCKS NOW, CALL REMOVEOVERFLOWBLOCK AS NEEDED
-
-			// cout << "number keep:" << number_keep_records << endl;
-			// cout << "number move: " << number_move_records << endl;
-			// for (int i=0; i<bucketArray.at(splitting_index).size(); i++){
-			// 	string updated_block = "";
-			// 	updated_block.append
-			// 	updated_block.resize(4096, ' ');
-			// 	char buffer[4097];
-			// 	strcpy(buffer, updated_block.c_str());
-			// 	s.seekp(4096*offset, ios_base::beg);
-			// 	s.write(buffer, 4096);
-
-			// }
-		
-		
-		
 		}
 
-		
-		}
+		cout << "found record: " << searched_record.at(0) << endl;
+
+
+
+
+	}
+
+
 
 		// check overall load capacity at end of each add iteration and handle splitting here:
 
