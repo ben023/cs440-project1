@@ -360,7 +360,7 @@ int main(int argc, char *argv[]){
 		getline(sst, bio, ',');
 		getline(sst, mid, ',');
 
-		hash_value = getHash(stoi(eid, &st));
+		hash_value = getHash(stol(eid, &st));
 		 string last_n_bits;
 		
 

@@ -402,10 +402,10 @@ int main(int argc, char *argv[]){
 		string full_record;
 		string line;
 		// while (getline(employee_csv, line)){ //uncomment later after done testing with just one line
-		for (int k=0; k<25; k++){
+		for (int k=0; k<20; k++){
 			getline(employee_csv, line);
 			stringstream sst(line);
-
+		
 			
 			size_t st;
 			string hash_value;
@@ -420,7 +420,7 @@ int main(int argc, char *argv[]){
 			getline(sst, mid, ',');
 			sst.str("");
 			
-			hash_value = getHash(stoi(eid, &st));
+			hash_value = getHash(stol(eid, &st));
 			string last_n_bits;
 			int found_index;
 			int found_matching_id;
@@ -436,7 +436,13 @@ int main(int argc, char *argv[]){
 				} 
 			}
 			// ;
-		
+			if (k==19){
+				createBucketArray(bucketArray);
+				for (int i=0; i<bucketArray.at(found_index).size(); i++)
+					cout << "BUCKET OFFSETS: " << bucketArray.at(found_index).at(i) << endl;
+				cout << "printing bucket array: ";
+				printBucketArray(bucketArray);
+			}
 		
 			// delimiter '#' for separating elements within a record, '$' for separating whole records within a block
 			string new_record = eid + "#" + name + "#" + bio + "#" + mid + "$";
@@ -511,7 +517,7 @@ int main(int argc, char *argv[]){
 			}
 
 			if (!CapOk(getN(0), getN(2))){
-				// cout << "Splitting" << endl;
+				cout << "Splitting" << endl;
 				// cap exceeded, must split and redistribute
 				// cout << "Cap reached: " << getN(0) << "," << getN(2) << endl;
 
@@ -566,27 +572,35 @@ int main(int argc, char *argv[]){
 						temp = block;
 						std::string delimiter2 = "#";
 						std::string token2 = token.substr(0, block.find(delimiter2)); // token is the record's id
-						string hash_temp = getHash(stoi(token2)); // get hash from id
+						string hash_temp = getHash(stol(token2)); // get hash from id
 						if (levelKey(hash_temp,key_after_split_size) == key_after_split){
+							cout << "Key after split, size, and keep key: " << key_after_split << " , " << key_after_split_size << "," <<  hash_temp << endl;
+
 							token.append("$");
 							keep_records.push_back(token);
 						} else {
+							cout << "Key after split, size, and move key: " << key_after_split << " , " << key_after_split_size << "," <<  hash_temp << endl;
+
 							token.append("$");
 							move_records.push_back(token);
 						}	
 					}
 					// token.append("$");
-					cout << "Temp: " << token << endl;
-					cout << "Move record: " << move_records.at(move_records.size() - 1) << endl;
+					cout << "Number of blocks: " << save_all_blocks.size() << endl;
+					// cout << "Temp: " << token << endl;
+					// cout << "Move record: " << move_records.at(move_records.size() - 1) << endl;
 					if (token.compare(keep_records.at(keep_records.size() - 1)) !=0 && token.compare(move_records.at(move_records.size() - 1)) !=0){
-						cout << "Last record in block: " << token << endl;
+						// cout << "Last record in block: " << token << endl;
 						std::string delimiter3 = "#";
 						std::string token3 = token.substr(0, block.find(delimiter3)); // token is the record's id
-						string hash_temp = getHash(stoi(token3)); // get hash from id
+						string hash_temp = getHash(stol(token3)); // get hash from id
 						if (levelKey(hash_temp,key_after_split_size) == key_after_split){
-							token.append("$");
+							cout << "Key after split, size, and keep key: " << key_after_split << " , " << key_after_split_size << "," <<  hash_temp << endl;
+ 							token.append("$");
 							keep_records.push_back(token);
 						} else {
+							cout << "Key after split, size, and move key: " << key_after_split << " , " << key_after_split_size << "," <<  hash_temp << endl;
+
 							token.append("$");
 							move_records.push_back(token);
 						}
@@ -605,8 +619,8 @@ int main(int argc, char *argv[]){
 
 				// gathered all records and organized into move and keep, now rewrite blocks accordingly
 				// first go through all block offsets for original bucket
-				float number_keep_records = keep_records.size();
-				float number_move_records = move_records.size();
+				double number_keep_records = keep_records.size();
+				double number_move_records = move_records.size();
 				int count_down1 = number_keep_records;
 				int count_down2 = number_move_records;
 
@@ -634,7 +648,7 @@ int main(int argc, char *argv[]){
 				// loop through all original blocks and start to overwrite
 				for (int i=0; i<bucketArray.at(splitting_index).size(); i++){
 					int offset = bucketArray.at(splitting_index).at(i);
-					if (i >= all_keep_blocks.size()){
+					if (i >= all_keep_blocks.size() && save_all_blocks.size() != 1){
 						// rest of blocks need to be removed now
 						removeOverflow(splitting_index);
 
@@ -731,7 +745,7 @@ int main(int argc, char *argv[]){
 		for (int i=0; i<bucketArray.at(found_index).size(); i++){
 			string blocks = readBlock(bucketArray.at(found_index).at(i));
 			save_all_blocks.push_back(blocks);
-			// cout << "Blocks: " << save_all_blocks.at(i) << endl;
+			cout << "Blocks: " << save_all_blocks.at(i) << endl;
 		}
 
 
@@ -745,7 +759,7 @@ int main(int argc, char *argv[]){
 				block.erase(0, pos + delimiter.length());
 				std::string delimiter2 = "#";
 				std::string token2 = token.substr(0, block.find(delimiter2)); // token is the record's id
-				string hash_temp = getHash(stoi(token2)); // get hash from id
+				string hash_temp = getHash(stol(token2)); // get hash from id
 				if (id == token2){
 					cout << "Found record (elements are delimited by '#'): " << token << endl;
 					return 1;
@@ -755,12 +769,12 @@ int main(int argc, char *argv[]){
 			std::string delimiter3 = "#";
 			std::string token3 = token.substr(0, token.find(delimiter3)); // token is the record's id
 			cout << "token3: " << token3 << endl;
-			string hash_temp2 = getHash(stoi(token3)); // get hash from id
+			string hash_temp2 = getHash(stol(token3)); // get hash from id
 			if (id == token3){
 				cout << "Found record (elements are delimited by '#'): " << token << endl;
 				return 1;
 			}
-			}
+		}
 		cout << "Record does not exist." << endl;
 		return 0;
 
